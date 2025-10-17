@@ -20,7 +20,7 @@ def main():
     
     # Générer des mesures de température
     print("\n2. Génération des mesures de température...")
-    mesures = generator.generer_temperatures(500)  # 500 mesures pour les analyses Spark
+    mesures = generator.generer_temperatures(20)
     print(f"{len(mesures)} mesures générées")
     
     # Exporter en CSV

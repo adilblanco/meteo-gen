@@ -49,14 +49,16 @@ class MeteoGenerator:
             precipitation = round(random.uniform(0, 50), 1)  # mm
             nbr_polluants = random.randint(0, 10)
             
-            # Températures variables (0 à 4 mesures par jour, "pas toujours 3" selon l'énoncé)
-            nb_temperatures = random.randint(0, 4)
+            # Températures variables (0 à 4) avec distribution réaliste
+            # Ancienne version: nb_temperatures = random.randint(0, 4)
+            # Limite: distribution uniforme (20% pour chaque valeur) peu réaliste
+            nb_temperatures = random.choices([0, 1, 2, 3, 4], weights=[2, 4, 4, 10, 80])[0]
+            
             temperatures = []
-            if nb_temperatures > 0:
+            for _ in range(nb_temperatures):
                 # Températures en Fahrenheit (simule le Canada: -40°F à 100°F)
-                for _ in range(nb_temperatures):
-                    temp = round(random.uniform(-40, 100), 1)
-                    temperatures.append(temp)
+                temp = round(random.uniform(-40, 100), 1)
+                temperatures.append(temp)
             
             mesure = {
                 'dateMesure': date_mesure.strftime('%Y-%m-%d'),

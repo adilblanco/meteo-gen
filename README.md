@@ -31,4 +31,4 @@ Génère automatiquement :
 - `typeStation` : Type de station (P=portable, S=statique, casse variable)
 - `precipitation` : Quantité de précipitation en millimètres (0-50mm)
 - `nbrPolluants` : Nombre de polluants détectés (0-10)
-- `temperature` : Liste des températures en Fahrenheit (1-5 mesures par jour)
+- `temperature` : Liste des températures en Fahrenheit (0-4 mesures, 80% avec 4 mesures)
