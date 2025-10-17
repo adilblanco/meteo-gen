@@ -49,8 +49,8 @@ class MeteoGenerator:
             precipitation = round(random.uniform(0, 50), 1)  # mm
             nbr_polluants = random.randint(0, 10)
             
-            # Températures variables (0 à 5 mesures par jour)
-            nb_temperatures = random.randint(0, 5)
+            # Températures variables (0 à 4 mesures par jour, "pas toujours 3" selon l'énoncé)
+            nb_temperatures = random.randint(0, 4)
             temperatures = []
             if nb_temperatures > 0:
                 # Températures en Fahrenheit (simule le Canada: -40°F à 100°F)
@@ -89,7 +89,7 @@ class MeteoGenerator:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for mesure in mesures:
-                # Convertit la liste de températures en string pour CSV
+                # Convertit la liste de températures en string avec points-virgules (selon l'exemple)
                 mesure_csv = mesure.copy()
-                mesure_csv['temperature'] = ','.join(map(str, mesure['temperature'])) if mesure['temperature'] else ''
+                mesure_csv['temperature'] = ';'.join(map(str, mesure['temperature'])) if mesure['temperature'] else ''
                 writer.writerow(mesure_csv)
