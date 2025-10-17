@@ -16,7 +16,7 @@ python main.py
 
 Génère automatiquement :
 - `stations.data` : 5 stations météorologiques
-- `temperatures.data` : 500 mesures de température
+- `temperatures.data` : 20 mesures de température
 
 ## Format des données
 
