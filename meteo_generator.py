@@ -3,7 +3,7 @@ import random
 from faker import Faker
 from datetime import datetime, timedelta
 
-fake = Faker('fr_CA')  # Utilise le locale canadien français
+fake = Faker('en_CA')  # Utilise le locale anglais canadien
 
 class MeteoGenerator:
     """Générateur simple de données météorologiques simulées"""
@@ -51,8 +51,7 @@ class MeteoGenerator:
             
             # Températures variables (0 à 4) avec distribution réaliste
             # Ancienne version: nb_temperatures = random.randint(0, 4)
-            # Limite: distribution uniforme (20% pour chaque valeur) peu réaliste
-            nb_temperatures = random.choices([0, 1, 2, 3, 4], weights=[2, 4, 4, 10, 80])[0]
+            nb_temperatures = random.randint(1, 4)
             
             temperatures = []
             for _ in range(nb_temperatures):
@@ -84,14 +83,96 @@ class MeteoGenerator:
             for station in self.stations:
                 writer.writerow(station)
     
+    def generer_donnees_non_conformes(self):
+        """Génère des données non-conformes avec le signe '?' pour chaque colonne"""
+        donnees_non_conformes = []
+        
+        # Station valide de référence
+        station_ref = self.stations[0] if self.stations else {'codeStation': '1234567890'}
+        
+        # 1. codeStation: ? (reste des colonnes conforme)
+        donnees_non_conformes.append({
+            'dateMesure': '2024-06-15',
+            'codeStation': '?',
+            'typeStation': 'P',
+            'precipitation': 25.3,
+            'nbrPolluants': 3,
+            'temperature': [12.5, 18.2]
+        })
+        
+        # 2. dateMesure: ? (reste des colonnes conforme)
+        donnees_non_conformes.append({
+            'dateMesure': '?',
+            'codeStation': station_ref['codeStation'],
+            'typeStation': 'S',
+            'precipitation': 18.7,
+            'nbrPolluants': 5,
+            'temperature': [22.1, 15.8, 19.3]
+        })
+        
+        # 3. typeStation: ? (reste des colonnes conforme)
+        donnees_non_conformes.append({
+            'dateMesure': '2024-08-20',
+            'codeStation': station_ref['codeStation'],
+            'typeStation': '?',
+            'precipitation': 31.2,
+            'nbrPolluants': 2,
+            'temperature': [28.4, 26.7]
+        })
+        
+        # 4. precipitation: ? (reste des colonnes conforme)
+        donnees_non_conformes.append({
+            'dateMesure': '2024-09-10',
+            'codeStation': station_ref['codeStation'],
+            'typeStation': 'p',
+            'precipitation': '?',
+            'nbrPolluants': 7,
+            'temperature': [16.9, 21.2, 18.5]
+        })
+        
+        # 5. nbrPolluants: ? (reste des colonnes conforme)
+        donnees_non_conformes.append({
+            'dateMesure': '2024-11-05',
+            'codeStation': station_ref['codeStation'],
+            'typeStation': 'S',
+            'precipitation': 42.8,
+            'nbrPolluants': '?',
+            'temperature': [8.3, 12.1]
+        })
+        
+        # 6. temperature: ? (reste des colonnes conforme)
+        donnees_non_conformes.append({
+            'dateMesure': '2024-12-01',
+            'codeStation': station_ref['codeStation'],
+            'typeStation': 'P',
+            'precipitation': 15.6,
+            'nbrPolluants': 4,
+            'temperature': '?'
+        })
+        
+        return donnees_non_conformes
+
     def exporter_temperatures_csv(self, mesures, fichier='temperatures.data'):
         """Exporte les mesures de température en CSV"""
         with open(fichier, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['dateMesure', 'codeStation', 'typeStation', 'precipitation', 'nbrPolluants', 'temperature']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
+            
+            # Écrire les mesures normales
             for mesure in mesures:
                 # Convertit la liste de températures en string avec points-virgules (selon l'exemple)
                 mesure_csv = mesure.copy()
                 mesure_csv['temperature'] = ';'.join(map(str, mesure['temperature'])) if mesure['temperature'] else ''
                 writer.writerow(mesure_csv)
+            
+            # Ajouter les données non-conformes
+            donnees_non_conformes = self.generer_donnees_non_conformes()
+            for donnee in donnees_non_conformes:
+                donnee_csv = donnee.copy()
+                # Traiter le champ température pour les données non-conformes
+                if isinstance(donnee['temperature'], list):
+                    donnee_csv['temperature'] = ';'.join(map(str, donnee['temperature']))
+                else:
+                    donnee_csv['temperature'] = donnee['temperature']  # Déjà une string "?"
+                writer.writerow(donnee_csv)
