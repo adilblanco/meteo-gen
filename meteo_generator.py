@@ -90,10 +90,10 @@ class MeteoGenerator:
         # Station valide de référence
         station_ref = self.stations[0] if self.stations else {'codeStation': '1234567890'}
         
-        # 1. codeStation: ? (reste des colonnes conforme)
+        # 1. codeStation: 9 chiffres (non-conforme par longueur)
         donnees_non_conformes.append({
             'dateMesure': '2024-06-15',
-            'codeStation': '?',
+            'codeStation': '123456789',  # 9 chiffres
             'typeStation': 'P',
             'precipitation': 25.3,
             'nbrPolluants': 3,
