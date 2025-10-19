@@ -72,107 +72,115 @@ class MeteoGenerator:
         return mesures
     
     def exporter_stations_csv(self, fichier='stations.data'):
-        """Exporte les stations en CSV"""
+        """Exporte les stations en CSV, avec ajouts non-conformes pour les tests"""
         if not self.stations:
             return
-            
+
         with open(fichier, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['codeStation', 'nomStation', 'villeStation']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for station in self.stations:
                 writer.writerow(station)
+
+            # Ajout 1 : codeStation à 9 chiffres (non-conforme)
+            writer.writerow({
+                'codeStation': '123456789',
+                'nomStation': f"Station {fake.city()}",
+                'villeStation': fake.city()
+            })
+
+            # Ajout 2 : nomStation manquante sous forme '?'
+            writer.writerow({
+                'codeStation': str(random.randint(1000000000, 9999999999)),
+                'nomStation': '?',
+                'villeStation': fake.city()
+            })
+
+            # Ajout 3 : codeStation manquant sous forme '?'
+            writer.writerow({
+                'codeStation': '?',
+                'nomStation': f"Station {fake.city()}",
+                'villeStation': fake.city()
+            })
+
+            # Ajout 4 : villeStation manquante sous forme '?'
+            writer.writerow({
+                'codeStation': str(random.randint(1000000000, 9999999999)),
+                'nomStation': f"Station {fake.city()}",
+                'villeStation': '?'
+            })
     
-    def generer_donnees_non_conformes(self):
-        """Génère des données non-conformes avec le signe '?' pour chaque colonne"""
-        donnees_non_conformes = []
-        
-        # Station valide de référence
-        station_ref = self.stations[0] if self.stations else {'codeStation': '1234567890'}
-        
-        # 1. codeStation: 9 chiffres (non-conforme par longueur)
-        donnees_non_conformes.append({
-            'dateMesure': '2024-06-15',
-            'codeStation': '123456789',  # 9 chiffres
-            'typeStation': 'P',
-            'precipitation': 25.3,
-            'nbrPolluants': 3,
-            'temperature': [12.5, 18.2]
-        })
-        
-        # 2. dateMesure: ? (reste des colonnes conforme)
-        donnees_non_conformes.append({
-            'dateMesure': '?',
-            'codeStation': station_ref['codeStation'],
-            'typeStation': 'S',
-            'precipitation': 18.7,
-            'nbrPolluants': 5,
-            'temperature': [22.1, 15.8, 19.3]
-        })
-        
-        # 3. typeStation: ? (reste des colonnes conforme)
-        donnees_non_conformes.append({
-            'dateMesure': '2024-08-20',
-            'codeStation': station_ref['codeStation'],
-            'typeStation': '?',
-            'precipitation': 31.2,
-            'nbrPolluants': 2,
-            'temperature': [28.4, 26.7]
-        })
-        
-        # 4. precipitation: ? (reste des colonnes conforme)
-        donnees_non_conformes.append({
-            'dateMesure': '2024-09-10',
-            'codeStation': station_ref['codeStation'],
-            'typeStation': 'p',
-            'precipitation': '?',
-            'nbrPolluants': 7,
-            'temperature': [16.9, 21.2, 18.5]
-        })
-        
-        # 5. nbrPolluants: ? (reste des colonnes conforme)
-        donnees_non_conformes.append({
-            'dateMesure': '2024-11-05',
-            'codeStation': station_ref['codeStation'],
-            'typeStation': 'S',
-            'precipitation': 42.8,
-            'nbrPolluants': '?',
-            'temperature': [8.3, 12.1]
-        })
-        
-        # 6. temperature: ? (reste des colonnes conforme)
-        donnees_non_conformes.append({
-            'dateMesure': '2024-12-01',
-            'codeStation': station_ref['codeStation'],
-            'typeStation': 'P',
-            'precipitation': 15.6,
-            'nbrPolluants': 4,
-            'temperature': '?'
-        })
-        
-        return donnees_non_conformes
 
     def exporter_temperatures_csv(self, mesures, fichier='temperatures.data'):
-        """Exporte les mesures de température en CSV"""
+        """Exporte les mesures de température en CSV, avec ajouts non-conformes pour les tests"""
         with open(fichier, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['dateMesure', 'codeStation', 'typeStation', 'precipitation', 'nbrPolluants', 'temperature']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
-            
+
             # Écrire les mesures normales
             for mesure in mesures:
-                # Convertit la liste de températures en string avec points-virgules (selon l'exemple)
                 mesure_csv = mesure.copy()
                 mesure_csv['temperature'] = ';'.join(map(str, mesure['temperature'])) if mesure['temperature'] else ''
                 writer.writerow(mesure_csv)
-            
-            # Ajouter les données non-conformes
-            donnees_non_conformes = self.generer_donnees_non_conformes()
-            for donnee in donnees_non_conformes:
-                donnee_csv = donnee.copy()
-                # Traiter le champ température pour les données non-conformes
-                if isinstance(donnee['temperature'], list):
-                    donnee_csv['temperature'] = ';'.join(map(str, donnee['temperature']))
-                else:
-                    donnee_csv['temperature'] = donnee['temperature']  # Déjà une string "?"
-                writer.writerow(donnee_csv)
+
+            # Ajout 1 : codeStation 9 chiffres (non-conforme)
+            writer.writerow({
+                'dateMesure': '2024-06-15',
+                'codeStation': '123456789',
+                'typeStation': 'P',
+                'precipitation': 25.3,
+                'nbrPolluants': 3,
+                'temperature': '12.5;18.2'
+            })
+
+            # Ajout 2 : dateMesure non conforme
+            writer.writerow({
+                'dateMesure': '?',
+                'codeStation': self.stations[0]['codeStation'] if self.stations else '1234567890',
+                'typeStation': 'S',
+                'precipitation': 18.7,
+                'nbrPolluants': 5,
+                'temperature': '22.1;15.8;19.3'
+            })
+
+            # Ajout 3 : typeStation non conforme
+            writer.writerow({
+                'dateMesure': '2024-08-20',
+                'codeStation': self.stations[0]['codeStation'] if self.stations else '1234567890',
+                'typeStation': '?',
+                'precipitation': 31.2,
+                'nbrPolluants': 2,
+                'temperature': '28.4;26.7'
+            })
+
+            # Ajout 4 : precipitation non conforme
+            writer.writerow({
+                'dateMesure': '2024-09-10',
+                'codeStation': self.stations[0]['codeStation'] if self.stations else '1234567890',
+                'typeStation': 'p',
+                'precipitation': '?',
+                'nbrPolluants': 7,
+                'temperature': '16.9;21.2;18.5'
+            })
+
+            # Ajout 5 : nbrPolluants non conforme
+            writer.writerow({
+                'dateMesure': '2024-11-05',
+                'codeStation': self.stations[0]['codeStation'] if self.stations else '1234567890',
+                'typeStation': 'S',
+                'precipitation': 42.8,
+                'nbrPolluants': '?',
+                'temperature': '8.3;12.1'
+            })
+
+            # Ajout 6 : temperature non conforme
+            writer.writerow({
+                'dateMesure': '2024-12-01',
+                'codeStation': self.stations[0]['codeStation'] if self.stations else '1234567890',
+                'typeStation': 'P',
+                'precipitation': 15.6,
+                'nbrPolluants': 4,
+                'temperature': '?'
+            })
